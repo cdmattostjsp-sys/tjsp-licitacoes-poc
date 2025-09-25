@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # Título principal
-st.title("🤖 Synapse.IA – Agente IA para Licitações e Contratos do TJSP")
+st.title("🤖 Synapse.IA TJSP")
 
 st.markdown("---")
 
