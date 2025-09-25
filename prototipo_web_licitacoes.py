@@ -1,38 +1,80 @@
 import streamlit as st
-from dataclasses import dataclass
+import os
 
-@dataclass
-class ProcessoLicitatorio:
-    etapa: str
-    insumos: str
-    saida: dict
+# ---------------------
+# 🎯 CONFIGURAÇÕES INICIAIS
+# ---------------------
+st.set_page_config(page_title="SYNAPSE.IA - PoC TJSP", layout="wide")
 
-def executar_agente(etapa, insumos):
-    resposta = f"[✔] Documento da etapa '{etapa}' gerado com base em:\\n→ {insumos}"
-    return {etapa: resposta}
+# ---------------------
+# 🧠 TÍTULO DO APLICATIVO
+# ---------------------
+st.title("🤖 SYNAPSE.IA – Prova de Conceito • Licitações e Contratos TJSP")
 
-st.set_page_config(page_title="Agente IA – Licitações TJSP", page_icon="🤖")
-st.title("🤖 Agente IA – Licitações e Contratos TJSP")
+st.markdown("""
+> Este é um protótipo funcional para demonstração de um **ecossistema de agentes especializados em contratações públicas**, integrados ao fluxo da Nova Lei de Licitações (Lei 14.133/2021), em ambiente simulado.
+""")
 
-etapas = [
-    "DFD", "ETP", "ITF", "TR",
-    "Pesquisa de Preços", "Matriz de Riscos",
-    "Minutas/Editais", "Contrato",
-    "Fiscalização", "Checklist"
-]
+st.divider()
 
-etapa = st.selectbox("Selecione a etapa:", etapas)
-insumos = st.text_area("Descreva os insumos ou contexto:")
+# ---------------------
+# 📂 ACESSO À BIBLIOTECA DE DOCUMENTOS
+# ---------------------
+st.subheader("📁 Biblioteca de Documentos de Apoio")
 
-if st.button("Executar Agente"):
-    if not insumos.strip():
-        st.warning("⚠️ Por favor, preencha os insumos.")
+# Caminho para a pasta de documentos
+biblioteca_path = "biblioteca"
+
+# Verifica se a pasta existe
+if not os.path.exists(biblioteca_path):
+    st.warning("⚠️ A pasta 'biblioteca/' ainda não foi criada no repositório.")
+else:
+    arquivos = os.listdir(biblioteca_path)
+
+    if not arquivos:
+        st.info("📂 Nenhum documento foi encontrado na biblioteca. Faça o upload pelo GitHub.")
     else:
-        processo = ProcessoLicitatorio(etapa=etapa, insumos=insumos, saida={})
-        processo.saida = executar_agente(processo.etapa, processo.insumos)
-        st.success("✅ Agente executado com sucesso!")
-        st.subheader("📄 Resultado")
-        st.code(processo.saida[etapa], language="markdown")
+        arquivo_escolhido = st.selectbox("Selecione um documento para visualizar:", arquivos)
 
-st.markdown("---")
-st.caption("PoC desenvolvida para a Secretaria de Administração e Abastecimento – TJSP")
+        if st.button("🔍 Carregar Documento"):
+            caminho_arquivo = os.path.join(biblioteca_path, arquivo_escolhido)
+            try:
+                with open(caminho_arquivo, "rb") as f:
+                    conteudo = f.read()
+
+                st.success(f"📄 Documento carregado: `{arquivo_escolhido}`")
+
+                # Exibir conteúdo se for texto ou PDF
+                if arquivo_escolhido.endswith(".txt"):
+                    st.text(conteudo.decode("utf-8"))
+                elif arquivo_escolhido.endswith(".pdf"):
+                    st.info("Visualização de PDF não implementada nesta versão.")
+                else:
+                    st.info("Visualização de arquivos deste tipo ainda não está disponível nesta versão.")
+            except Exception as e:
+                st.error(f"Erro ao abrir o arquivo: {e}")
+
+# ---------------------
+# 📌 DEMONSTRAÇÃO BÁSICA DE AGENTES
+# ---------------------
+st.divider()
+st.subheader("🔧 Simulação de Execução de Agente Especializado")
+
+agente = st.selectbox("Escolha um agente para executar:", [
+    "Agente DFD (Formalização da Demanda)",
+    "Agente ETP (Estudo Técnico Preliminar)",
+    "Agente Matriz de Riscos",
+    "Agente Minutas e Editais",
+    "Agente Contrato Administrativo"
+])
+
+if st.button("🚀 Executar Agente"):
+    st.success(f"✅ {agente} executado com sucesso.")
+    st.write("📄 *Aqui seria exibido o resultado da execução automática, com base em modelos e documentos internos.*")
+
+# ---------------------
+# ℹ️ Rodapé
+# ---------------------
+st.divider()
+st.caption("🔒 Este é um ambiente de protótipo desenvolvido para uso institucional no TJSP.")
+
