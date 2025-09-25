@@ -3,6 +3,9 @@ import os
 import time
 import openai
 
+from docx import Document  # para arquivos .docx
+import PyPDF2  # para arquivos .pdf
+
 # Configuração da página
 st.set_page_config(
     page_title="Synapse.IA – Agente IA para Licitações",
@@ -10,31 +13,29 @@ st.set_page_config(
     layout="wide"
 )
 
-# Título principal
 st.title("🤖 Synapse.IA TJSP")
 st.markdown("---")
 
-# Inicializa a API da OpenAI com chave vinda do secrets.toml (ou painel do Streamlit)
 openai.api_key = st.secrets["openai_api_key"]
 
-# 📁 Biblioteca Integrada
+# Biblioteca integrada
 st.subheader("📂 Biblioteca Integrada")
 biblioteca_path = "biblioteca"
 
 # Verifica se a pasta existe
 if not os.path.exists(biblioteca_path):
-    st.error("❌ A pasta `biblioteca` não foi encontrada no repositório.")
+    st.error("❌ A pasta `biblioteca` não foi encontrada.")
     arquivos = []
 else:
     arquivos = os.listdir(biblioteca_path)
     if not arquivos:
-        st.warning("⚠️ Nenhum arquivo encontrado na pasta `biblioteca`.")
+        st.warning("⚠️ Nenhum arquivo encontrado na biblioteca.")
     else:
-        st.success(f"✅ {len(arquivos)} arquivo(s) carregado(s) com sucesso:")
+        st.success(f"✅ {len(arquivos)} arquivo(s) carregado(s):")
         for arquivo in arquivos:
             st.markdown(f"- `{arquivo}`")
 
-# --- Execução Simulada do Agente ---
+# Execução simulada
 if arquivos:
     st.markdown("---")
     st.subheader("⚙️ Execução Simulada do Agente")
@@ -44,25 +45,46 @@ if arquivos:
     if st.button("🤖 Processar com agente IA"):
         with st.spinner("Executando agente..."):
 
-            # 1. Lê o conteúdo do arquivo selecionado
             caminho_arquivo = os.path.join(biblioteca_path, opcao)
-            with open(caminho_arquivo, "r", encoding="utf-8") as f:
-                conteudo = f.read()
 
-            # 2. Envia para o GPT-4 (ou GPT-3.5)
-            resposta = openai.ChatCompletion.create(
-                model="gpt-4",  # ou "gpt-3.5-turbo"
-                messages=[
-                    {"role": "system", "content": "Você é um especialista em licitações públicas do TJSP."},
-                    {"role": "user", "content": f"Com base neste conteúdo, gere um resumo técnico: \n\n{conteudo}"}
-                ],
-                temperature=0.3,
-                max_tokens=800
-            )
+            # Função para extrair o conteúdo com base no tipo do arquivo
+            def extrair_texto(caminho):
+                if caminho.endswith(".txt"):
+                    with open(caminho, "r", encoding="utf-8") as f:
+                        return f.read()
+                elif caminho.endswith(".docx"):
+                    doc = Document(caminho)
+                    return "\n".join([p.text for p in doc.paragraphs])
+                elif caminho.endswith(".pdf"):
+                    with open(caminho, "rb") as f:
+                        leitor = PyPDF2.PdfReader(f)
+                        texto = ""
+                        for pagina in leitor.pages:
+                            texto += pagina.extract_text()
+                        return texto
+                else:
+                    return "❌ Tipo de arquivo não suportado."
 
-            resultado = resposta["choices"][0]["message"]["content"]
+            conteudo = extrair_texto(caminho_arquivo)
 
-            # 3. Exibe a resposta no app
-            st.success("✅ Agente executado com sucesso!")
+            if "Tipo de arquivo não suportado" in conteudo:
+                st.error(conteudo)
+            else:
+                resposta = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "Você é um especialista em licitações públicas do TJSP."},
+                        {"role": "user", "content": f"Com base neste conteúdo, gere um resumo técnico:\n\n{conteudo}"}
+                    ],
+                    temperature=0.3,
+                    max_tokens=800
+                )
+
+                resultado = resposta["choices"][0]["message"]["content"]
+
+                st.success("✅ Agente executado com sucesso!")
+                st.markdown("### 🧠 Resultado do agente IA:")
+                st.write(resultado)
+ com sucesso!")
             st.markdown("### 🧠 Resultado do agente IA:")
             st.write(resultado)
