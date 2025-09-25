@@ -2,42 +2,44 @@ import streamlit as st
 import os
 import time
 
-# Configurações da página
+# Configuração da página
 st.set_page_config(
-    page_title="Synapse.IA – Agentes para Licitações e Contratos TJSP",
-    page_icon="🧠",
+    page_title="Synapse.IA – Agente IA para Licitações",
+    page_icon="🤖",
     layout="wide"
 )
 
 # Título principal
 st.title("🤖 Synapse.IA TJSP")
-
 st.markdown("---")
 
-# Seção de simulação de agentes
+# 📁 Biblioteca Integrada
 st.subheader("📂 Biblioteca Integrada")
 biblioteca_path = "biblioteca"
 
 # Verifica se a pasta existe
 if not os.path.exists(biblioteca_path):
-    st.error("❌ A pasta `biblioteca/` não foi encontrada no repositório.")
+    st.error("❌ A pasta `biblioteca` não foi encontrada no repositório.")
+    arquivos = []
 else:
     arquivos = os.listdir(biblioteca_path)
-
     if not arquivos:
-        st.warning("⚠️ Nenhum arquivo encontrado na pasta `biblioteca/`. Faça upload pelo GitHub.")
+        st.warning("⚠️ Nenhum arquivo encontrado na pasta `biblioteca`.")
     else:
-        st.success(f"📚 {len(arquivos)} arquivo(s) carregado(s) com sucesso:")
+        st.success(f"✅ {len(arquivos)} arquivo(s) carregado(s) com sucesso:")
         for arquivo in arquivos:
-            st.write(f"• `{arquivo}`")
+            st.markdown(f"- `{arquivo}`")
 
-        st.markdown("---")
-        st.subheader("⚙️ Execução Simulada do Agente")
+# --- Execução Simulada do Agente ---
+if arquivos:
+    st.markdown("---")
+    st.subheader("⚙️ Execução Simulada do Agente")
 
-        opcao = st.selectbox("Selecione um arquivo para processar:", arquivos)
+    opcao = st.selectbox("Selecione um arquivo para processar:", arquivos)
 
-        if st.button("▶️ Processar com agente IA"):
-            with st.spinner("Executando agente..."):
-                time.sleep(2)  # simula processamento
-                st.success(f"✅ O agente analisou o arquivo `{opcao}` e gerou uma saída simulada.")
-                st.code(f"Documento `{opcao}` processado com sucesso!\n\n[Simulação de resposta do agente aqui]", language="markdown")
+    if st.button("🤖 Processar com agente IA"):
+        with st.spinner("Executando agente..."):
+            time.sleep(2)  # Simula o tempo de processamento
+            st.success("✅ Agente executado com sucesso!")
+            st.markdown("### Resultado da IA:")
+            st.write(f"Este é um exemplo de resposta do agente IA com base no arquivo **{opcao}**.")
