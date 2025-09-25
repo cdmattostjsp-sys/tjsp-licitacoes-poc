@@ -3,8 +3,8 @@ import os
 import time
 import openai
 
-from docx import Document  # para arquivos .docx
-import PyPDF2  # para arquivos .pdf
+from docx import Document
+import PyPDF2
 
 # Configuração da página
 st.set_page_config(
@@ -13,29 +13,31 @@ st.set_page_config(
     layout="wide"
 )
 
+# Título
 st.title("🤖 Synapse.IA TJSP")
 st.markdown("---")
 
+# Inicializa a API da OpenAI
 openai.api_key = st.secrets["openai_api_key"]
 
-# Biblioteca integrada
+# 📁 Biblioteca Integrada
 st.subheader("📂 Biblioteca Integrada")
 biblioteca_path = "biblioteca"
 
 # Verifica se a pasta existe
 if not os.path.exists(biblioteca_path):
-    st.error("❌ A pasta `biblioteca` não foi encontrada.")
+    st.error("❌ A pasta `biblioteca` não foi encontrada no repositório.")
     arquivos = []
 else:
     arquivos = os.listdir(biblioteca_path)
     if not arquivos:
-        st.warning("⚠️ Nenhum arquivo encontrado na biblioteca.")
+        st.warning("⚠️ Nenhum arquivo encontrado na pasta `biblioteca`.")
     else:
-        st.success(f"✅ {len(arquivos)} arquivo(s) carregado(s):")
+        st.success(f"✅ {len(arquivos)} arquivo(s) carregado(s) com sucesso:")
         for arquivo in arquivos:
             st.markdown(f"- `{arquivo}`")
 
-# Execução simulada
+# --- Execução Simulada do Agente ---
 if arquivos:
     st.markdown("---")
     st.subheader("⚙️ Execução Simulada do Agente")
@@ -47,7 +49,7 @@ if arquivos:
 
             caminho_arquivo = os.path.join(biblioteca_path, opcao)
 
-            # Função para extrair o conteúdo com base no tipo do arquivo
+            # Função para extrair conteúdo
             def extrair_texto(caminho):
                 if caminho.endswith(".txt"):
                     with open(caminho, "r", encoding="utf-8") as f:
@@ -65,13 +67,14 @@ if arquivos:
                 else:
                     return "❌ Tipo de arquivo não suportado."
 
+            # Extração e envio à OpenAI
             conteudo = extrair_texto(caminho_arquivo)
 
-            if "Tipo de arquivo não suportado" in conteudo:
+            if "❌ Tipo de arquivo não suportado." in conteudo:
                 st.error(conteudo)
             else:
                 resposta = openai.ChatCompletion.create(
-                    model="gpt-4",
+                    model="gpt-4",  # ou "gpt-3.5-turbo"
                     messages=[
                         {"role": "system", "content": "Você é um especialista em licitações públicas do TJSP."},
                         {"role": "user", "content": f"Com base neste conteúdo, gere um resumo técnico:\n\n{conteudo}"}
@@ -85,6 +88,3 @@ if arquivos:
                 st.success("✅ Agente executado com sucesso!")
                 st.markdown("### 🧠 Resultado do agente IA:")
                 st.write(resultado)
- com sucesso!")
-            st.markdown("### 🧠 Resultado do agente IA:")
-            st.write(resultado)
